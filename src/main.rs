@@ -7,12 +7,15 @@ mod problems;
 use cli::*;
 use utils::Solve;
 
+use dotenv::dotenv;
+
 pub fn solve(mut solution: Box<dyn Solve>) {
     solution.part1();
     solution.part2();
 }
 
 fn main() {
+    dotenv().ok();
     let cli = Cli::parse();
 
     let solution: Box<dyn Solve> = match cli.day {
