@@ -1,6 +1,5 @@
 use crate::utils::*;
 
-// Add your own custom fields for the solution here
 pub struct Solution {}
 
 impl Solution {
@@ -12,16 +11,24 @@ impl Solution {
 }
 
 impl Solve for Solution {
-    // Perform any manipulations to the input here
     fn process_input(&mut self, path: &str) {
-        let _raw = read_file(path);
+        let games = read_file(path)
+            .split('\n')
+            .filter(|g| !g.is_empty())
+            .map(|g| g.to_string())
+            .collect::<Vec<String>>();
+
+        for game in games.iter() {
+            let (game_id, game_outcomes) = game.split_once(": ").unwrap();
+            for subgame in game_outcomes.split("; ") {
+                for selection in subgame.split(", ") {
+                    println!("Selection: {selection}");
+                }
+            }
+        }
     }
 
-    fn part1(&mut self) {
-        println!("Day02 - Part 1: Edit me to start!");
-    }
+    fn part1(&mut self) {}
 
-    fn part2(&mut self) {
-        println!("Day02 - Part 2: Edit me to start!");
-    }
+    fn part2(&mut self) {}
 }
