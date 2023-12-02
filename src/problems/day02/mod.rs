@@ -62,6 +62,39 @@ impl Game {
         }
         return None;
     }
+
+    pub fn minimum_number_of_cubes(&self) -> (i32, i32, i32) {
+        let mut rc = 0;
+        let mut gc = 0;
+        let mut bc = 0;
+
+        for subgame in self.subgames.iter() {
+            for selection in subgame.split(", ") {
+                let (num, color) = selection.split_once(' ').unwrap();
+                let num = num.parse::<i32>().unwrap();
+                match color {
+                    "red" => {
+                        if num > rc {
+                            rc = num;
+                        }
+                    }
+                    "green" => {
+                        if num > gc {
+                            gc = num;
+                        }
+                    }
+                    "blue" => {
+                        if num > bc {
+                            bc = num;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        return (rc, gc, bc);
+    }
 }
 
 pub struct Solution {
@@ -99,15 +132,25 @@ impl Solve for Solution {
     }
 
     fn part1(&mut self) {
-        let mut total = 0;
-        for game in self.games.iter() {
-            if let Some(id) = game.is_possible_game(12, 13, 14) {
-                total += id;
-            }
-        }
+        let total: i32 = self
+            .games
+            .iter()
+            .filter_map(|g| g.is_possible_game(12, 13, 14))
+            .sum();
 
         println!("Day 02 / Part 1: {total}");
     }
 
-    fn part2(&mut self) {}
+    fn part2(&mut self) {
+        let total: i32 = self
+            .games
+            .iter()
+            .map(|g| {
+                let (r, g, b) = g.minimum_number_of_cubes();
+                r * g * b
+            })
+            .sum();
+
+        println!("Day 02 / Part 2: {total}");
+    }
 }
