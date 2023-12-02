@@ -1,26 +1,5 @@
 use crate::utils::*;
 
-#[derive(Debug)]
-enum Cube {
-    Red(i32),
-    Blue(i32),
-    Green(i32),
-    Invalid,
-}
-
-impl Cube {
-    fn from_str(s: &str) -> Self {
-        let (color, value) = s.split_once(' ').unwrap();
-        let count = value.parse::<i32>().unwrap();
-        match color {
-            "red" => Self::Red(count),
-            "blue" => Self::Blue(count),
-            "green" => Self::Green(count),
-            _ => Self::Invalid,
-        }
-    }
-}
-
 struct Game {
     id: i32,
     subgames: Vec<String>,
