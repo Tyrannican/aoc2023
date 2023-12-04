@@ -2,13 +2,6 @@ use crate::utils::*;
 
 type Coord = (isize, isize);
 
-#[derive(Clone, PartialEq)]
-enum Slot {
-    Symbol(char),
-    Number(char),
-    Null,
-}
-
 #[derive(Debug)]
 pub struct Part {
     num: i32,
