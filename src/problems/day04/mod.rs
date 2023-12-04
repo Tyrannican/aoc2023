@@ -71,5 +71,25 @@ impl Solve for Solution {
         println!("Day 04 / Part 1 - {total}");
     }
 
-    fn part2(&mut self) {}
+    fn part2(&mut self) {
+        let mut stack = vec![];
+        let mut total_cards = self.cards.len();
+        for (idx, card) in self.cards.iter().enumerate() {
+            let wins = card.winner.intersection(&card.numbers).count();
+            for i in idx + 1..=idx + wins {
+                stack.push((i, &self.cards[i]));
+                total_cards += 1;
+            }
+        }
+
+        while let Some((idx, card)) = stack.pop() {
+            let wins = card.winner.intersection(&card.numbers).count();
+            for i in idx + 1..=idx + wins {
+                stack.push((i, &self.cards[i]));
+                total_cards += 1;
+            }
+        }
+
+        println!("Day 04 / Part 2: {total_cards}");
+    }
 }
