@@ -37,16 +37,6 @@ impl Solution {
         sol
     }
 
-    pub fn has_symbol(&self, x: isize, y: isize) -> bool {
-        for i in x - 1..=x + 1 {
-            for j in y - 1..=y + 1 {
-                //
-            }
-        }
-
-        return false;
-    }
-
     pub fn valid_part(&self, part: &Part, symbol: &Symbol) -> bool {
         let (x, y) = symbol.position;
         for (n_x, n_y) in part.positions.iter() {
@@ -105,41 +95,33 @@ impl Solve for Solution {
         }
 
         println!("Day 03 / Part 1 - {}", valid_parts.iter().sum::<i32>());
-        // let mut parts: Vec<i32> = Vec::new();
-        // let mut p_str = String::new();
-        // let mut prev: Slot = Slot::Null;
-        // let mut valid_num = false;
-
-        // for y in 0..self.height {
-        //     for x in 0..self.width {
-        //         let idx = self.xy_idx(x, y);
-        //         let current = self.schematic[idx].clone();
-        //         match self.schematic[idx] {
-        //             Slot::Number(c) => {
-        //                 if self.has_symbol(x as isize, y as isize) {
-        //                     valid_num = true;
-        //                 }
-        //                 p_str.push(c);
-        //             }
-        //             Slot::Null | Slot::Symbol(_) => match prev {
-        //                 Slot::Number(_) => {
-        //                     if valid_num {
-        //                         let num = p_str.parse::<i32>().unwrap();
-        //                         parts.push(num);
-        //                     }
-        //                     p_str.clear();
-        //                     valid_num = false;
-        //                 }
-        //                 _ => {}
-        //             },
-        //         }
-
-        //         prev = current;
-        //     }
-        // }
-
-        // println!("Day 03/Part 1 - Total: {}", parts.iter().sum::<i32>());
     }
 
-    fn part2(&mut self) {}
+    fn part2(&mut self) {
+        let gears: Vec<&Symbol> = self
+            .symbols
+            .iter()
+            .filter_map(|s| match s.glyph {
+                '*' => Some(s),
+                _ => None,
+            })
+            .collect();
+
+        let mut ratios = vec![];
+        let mut valid_gears = vec![];
+        for gear in gears.into_iter() {
+            for part in self.parts.iter() {
+                if self.valid_part(part, gear) {
+                    valid_gears.push(part.num);
+                }
+            }
+
+            if valid_gears.len() == 2 {
+                ratios.push(valid_gears[0] * valid_gears[1]);
+            }
+            valid_gears.clear();
+        }
+
+        println!("Day 03 / Part 2 - {}", ratios.iter().sum::<i32>());
+    }
 }
