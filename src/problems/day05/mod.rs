@@ -1,5 +1,8 @@
 use crate::utils::*;
 
+use std::sync::{Arc, Mutex};
+use std::thread;
+
 type MapRange = (i64, i64, i64);
 
 pub struct Solution {
@@ -15,6 +18,14 @@ impl Solution {
         };
         sol.process_input("day05/input.txt");
         sol
+    }
+
+    pub fn convert_seeds_to_ranges(&mut self) -> Vec<(i64, i64)> {
+        return self
+            .seeds
+            .chunks(2)
+            .map(|chunk| (chunk[0], chunk[1]))
+            .collect();
     }
 
     pub fn get_final_location(&self, mut seed: i64) -> i64 {
@@ -95,5 +106,10 @@ impl Solve for Solution {
         println!("Day 05 / Part 1: {lowest}");
     }
 
-    fn part2(&mut self) {}
+    fn part2(&mut self) {
+        let ranges = self.convert_seeds_to_ranges();
+        let mut min_range = ranges.iter().map(|r| r.0).min().unwrap_or(-1);
+        let mut max_range = ranges.iter().map(|r| r.0 + r.1).max().unwrap_or(-1);
+        let mut min_value = i64::MAX;
+    }
 }
