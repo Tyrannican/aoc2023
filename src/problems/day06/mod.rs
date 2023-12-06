@@ -1,27 +1,69 @@
 use crate::utils::*;
 
-// Add your own custom fields for the solution here
-pub struct Solution {}
+pub struct Solution {
+    times: Vec<i64>,
+    distances: Vec<i64>,
+}
 
 impl Solution {
     pub fn new() -> Self {
-        let mut sol = Self {};
+        let mut sol = Self {
+            times: vec![],
+            distances: vec![],
+        };
         sol.process_input("day06/input.txt");
         sol
     }
 }
 
+fn race_check(time: i64, distance: i64) -> i64 {
+    let mut mid = time / 2;
+    let mut total = mid * i64::abs(mid - time);
+    let mut wins = 0;
+
+    while total > distance {
+        wins += 1;
+        mid -= 1;
+        total = mid * i64::abs(mid - time);
+    }
+
+    if time % 2 != 0 {
+        wins *= 2;
+    } else {
+        wins = (wins * 2) - 1;
+    }
+
+    return wins;
+}
+
 impl Solve for Solution {
-    // Perform any manipulations to the input here
     fn process_input(&mut self, path: &str) {
-        let _raw = read_file(path);
+        for line in read_file(path).lines() {
+            let mut items: Vec<_> = line.split_whitespace().collect();
+            if items.remove(0).contains("Time") {
+                self.times = items
+                    .into_iter()
+                    .map(|t| t.parse::<i64>().unwrap())
+                    .collect();
+            } else {
+                self.distances = items
+                    .into_iter()
+                    .map(|t| t.parse::<i64>().unwrap())
+                    .collect();
+            }
+        }
     }
 
     fn part1(&mut self) {
-        println!("Day06 - Part 1: Edit me to start!");
+        let answer: i64 = self
+            .times
+            .iter()
+            .zip(self.distances.iter())
+            .map(|(time, distance)| race_check(*time, *distance))
+            .product();
+
+        println!("Day 06 / Part 1: {answer}");
     }
 
-    fn part2(&mut self) {
-        println!("Day06 - Part 2: Edit me to start!");
-    }
+    fn part2(&mut self) {}
 }
