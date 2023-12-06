@@ -1,5 +1,4 @@
 use crate::utils::*;
-
 use std::sync::{Arc, Mutex};
 use std::thread;
 
@@ -27,26 +26,26 @@ impl Solution {
             .map(|chunk| (chunk[0], chunk[1]))
             .collect();
     }
+}
 
-    pub fn get_final_location(&self, mut seed: i64) -> i64 {
-        for map in self.maps.iter() {
-            for ranges in map.into_iter() {
-                let (dst, src, rng) = ranges;
-                if seed >= *src && seed <= *src + rng {
-                    let offset = i64::abs(src - dst);
-                    let value = if src < dst {
-                        seed + offset
-                    } else {
-                        seed - offset
-                    };
-                    seed = value;
-                    break;
-                }
+pub fn get_final_location(maps: &Vec<Vec<MapRange>>, mut seed: i64) -> i64 {
+    for map in maps.iter() {
+        for ranges in map.into_iter() {
+            let (dst, src, rng) = ranges;
+            if seed >= *src && seed <= *src + rng {
+                let offset = i64::abs(src - dst);
+                let value = if src < dst {
+                    seed + offset
+                } else {
+                    seed - offset
+                };
+                seed = value;
+                break;
             }
         }
-
-        return seed;
     }
+
+    return seed;
 }
 
 fn get_seeds(s: &str) -> Vec<i64> {
@@ -99,17 +98,47 @@ impl Solve for Solution {
         let lowest = self
             .seeds
             .iter()
-            .map(|s| self.get_final_location(*s))
+            .map(|s| get_final_location(&self.maps, *s))
             .min()
             .unwrap_or(-1);
 
         println!("Day 05 / Part 1: {lowest}");
     }
 
+    // There's an obvious trick here that i'm too dumb to recognise
+    // so brute force go brrrrrrrrr
     fn part2(&mut self) {
-        let ranges = self.convert_seeds_to_ranges();
-        let mut min_range = ranges.iter().map(|r| r.0).min().unwrap_or(-1);
-        let mut max_range = ranges.iter().map(|r| r.0 + r.1).max().unwrap_or(-1);
-        let mut min_value = i64::MAX;
+        let seeds: Vec<_> = self
+            .seeds
+            .clone()
+            .chunks(2)
+            .map(|chunk| chunk[0]..chunk[0] + chunk[1])
+            .collect();
+
+        let mut hdls = vec![];
+        let min = Arc::new(Mutex::new(i64::MAX));
+        for ranges in seeds.iter() {
+            let maps = self.maps.clone();
+            let ranges = ranges.clone();
+            let min = Arc::clone(&min);
+            hdls.push(thread::spawn(move || {
+                for seed in ranges.into_iter() {
+                    let loc = get_final_location(&maps, seed);
+                    let mut value = min.lock().unwrap();
+                    if loc < *value {
+                        *value = loc;
+                    }
+                }
+            }));
+        }
+
+        for hdl in hdls {
+            let _ = hdl.join();
+        }
+
+        let lock = Arc::try_unwrap(min).expect("Unable to unwrap ARC");
+        let answer = lock.into_inner().expect("mutex broken");
+
+        println!("Day 05 / Part 2: {answer}");
     }
 }
