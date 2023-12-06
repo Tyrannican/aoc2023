@@ -16,6 +16,15 @@ impl Solution {
     }
 }
 
+fn convert_to_single_num(v: &Vec<i64>) -> i64 {
+    let mut output = String::new();
+    for number in v.iter() {
+        output.push_str(&number.to_string());
+    }
+
+    return output.parse::<i64>().unwrap();
+}
+
 fn race_check(time: i64, distance: i64) -> i64 {
     let mut mid = time / 2;
     let mut total = mid * i64::abs(mid - time);
@@ -65,5 +74,11 @@ impl Solve for Solution {
         println!("Day 06 / Part 1: {answer}");
     }
 
-    fn part2(&mut self) {}
+    fn part2(&mut self) {
+        let time = convert_to_single_num(&self.times);
+        let distance = convert_to_single_num(&self.distances);
+
+        let wins = race_check(time, distance);
+        println!("Day 06 / Part 2: {wins}");
+    }
 }
