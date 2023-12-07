@@ -161,31 +161,28 @@ impl Hand {
         return Ordering::Equal;
     }
 
-    pub fn is_better_than_with_new_rule(&self, other: &Self) -> Ordering {
-        Ordering::Equal
-    }
-}
+    // Recalculate based on the Joker rule in Part 2
+    // Todo:: fix
+    fn reevaluate_hand(&mut self) {
+        let mut values = self.values.clone();
+        let mut counter: HashMap<CardValue, usize> = HashMap::new();
+        for value in values.clone().into_iter() {
+            counter.entry(value).and_modify(|v| *v += 1).or_insert(1);
+        }
 
-// Recalculate based on the Joker rule in Part 2
-fn reevaluate_hand(hand: &Hand) -> (Vec<CardValue>, HandType) {
-    let mut values = hand.values.clone();
-    let mut counter: HashMap<CardValue, usize> = HashMap::new();
-    for value in values.clone().into_iter() {
-        counter.entry(value).and_modify(|v| *v += 1).or_insert(1);
-    }
-
-    if counter.contains_key(&CardValue::J) {
-        let (largest_key, _) = counter.iter().max_by_key(|k| k.1).unwrap();
-
-        for (pos, value) in hand.values.iter().enumerate() {
-            if *value == CardValue::J {
-                values[pos] = largest_key.clone();
+        // Determine how to deal with issues when there is only one of a given type
+        // e.g. [2, Q, A, J, 5] -> [2, Q, A, J, 5]
+        if counter.contains_key(&CardValue::J) {
+            let (mut largest_key, total) = counter.iter().max_by_key(|k| k.1).unwrap();
+            for (pos, value) in self.values.iter().enumerate() {
+                if *value == CardValue::J {
+                    values[pos] = largest_key.clone();
+                }
             }
         }
-    }
 
-    let hand_type = HandType::from_cards(&values);
-    return (values, hand_type);
+        self.hand_type = HandType::from_cards(&values);
+    }
 }
 
 pub struct Solution {
@@ -240,6 +237,21 @@ impl Solve for Solution {
     }
 
     fn part2(&mut self) {
-        self.hands.sort_by(|a, b| b.hand_type.cmp(&a.hand_type));
+        let mut result = 0;
+        let mut current_rank = 1;
+
+        self.hands.iter_mut().for_each(|h| h.reevaluate_hand());
+        self.hands.sort_by(|a, b| {
+            if a.hand_type == b.hand_type {
+                return a.is_better_than(b);
+            }
+
+            a.hand_type.cmp(&b.hand_type)
+        });
+
+        for hand in self.hands.iter() {
+            result += current_rank * hand.bid;
+            current_rank += 1;
+        }
     }
 }
