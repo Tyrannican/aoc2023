@@ -14,10 +14,13 @@ enum HandType {
 }
 
 impl HandType {
-    pub fn from_cards(cards: &str) -> Self {
-        let mut count: HashMap<char, usize> = HashMap::new();
-        for char in cards.chars() {
-            count.entry(char).and_modify(|e| *e += 1).or_insert(1);
+    pub fn from_cards(cards: &Vec<CardValue>) -> Self {
+        let mut count: HashMap<CardValue, usize> = HashMap::new();
+        for value in cards.iter() {
+            count
+                .entry(value.clone())
+                .and_modify(|e| *e += 1)
+                .or_insert(1);
         }
 
         let values: Vec<usize> = count.values().into_iter().map(|c| *c).collect();
@@ -42,9 +45,43 @@ impl HandType {
         }
     }
 }
+impl Eq for HandType {}
+
+impl PartialOrd for HandType {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        return Some(self.cmp(other));
+    }
+}
+impl Ord for HandType {
+    fn cmp(&self, other: &Self) -> Ordering {
+        use HandType::*;
+
+        match (&self, &other) {
+            (FiveKind, FiveKind)
+            | (FourKind, FourKind)
+            | (FullHouse, FullHouse)
+            | (ThreeKind, ThreeKind)
+            | (TwoPair, TwoPair)
+            | (Pair, Pair)
+            | (High, High) => Ordering::Equal,
+            (FiveKind, _) => std::cmp::Ordering::Greater,
+            (_, FiveKind) => std::cmp::Ordering::Less,
+            (FourKind, _) => std::cmp::Ordering::Greater,
+            (_, FourKind) => std::cmp::Ordering::Less,
+            (FullHouse, _) => std::cmp::Ordering::Greater,
+            (_, FullHouse) => std::cmp::Ordering::Less,
+            (ThreeKind, _) => std::cmp::Ordering::Greater,
+            (_, ThreeKind) => std::cmp::Ordering::Less,
+            (TwoPair, _) => std::cmp::Ordering::Greater,
+            (_, TwoPair) => std::cmp::Ordering::Less,
+            (Pair, _) => std::cmp::Ordering::Greater,
+            (_, Pair) => std::cmp::Ordering::Less,
+        }
+    }
+}
 
 // MAybe
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Hash)]
 enum CardValue {
     A,
     K,
@@ -102,19 +139,8 @@ impl Ord for CardValue {
     }
 }
 
-const HAND_ORDER: [HandType; 7] = [
-    HandType::High,
-    HandType::Pair,
-    HandType::TwoPair,
-    HandType::ThreeKind,
-    HandType::FullHouse,
-    HandType::FourKind,
-    HandType::FiveKind,
-];
-
 #[derive(Debug, Clone)]
 struct Hand {
-    cards: String,
     values: Vec<CardValue>,
     bid: i32,
     hand_type: HandType,
@@ -134,10 +160,32 @@ impl Hand {
 
         return Ordering::Equal;
     }
+
+    pub fn is_better_than_with_new_rule(&self, other: &Self) -> Ordering {
+        Ordering::Equal
+    }
 }
 
-fn rank_hands(hands: &mut Vec<Hand>) {
-    hands.sort_by(|a, b| a.is_better_than(b));
+// Recalculate based on the Joker rule in Part 2
+fn reevaluate_hand(hand: &Hand) -> (Vec<CardValue>, HandType) {
+    let mut values = hand.values.clone();
+    let mut counter: HashMap<CardValue, usize> = HashMap::new();
+    for value in values.clone().into_iter() {
+        counter.entry(value).and_modify(|v| *v += 1).or_insert(1);
+    }
+
+    if counter.contains_key(&CardValue::J) {
+        let (largest_key, _) = counter.iter().max_by_key(|k| k.1).unwrap();
+
+        for (pos, value) in hand.values.iter().enumerate() {
+            if *value == CardValue::J {
+                values[pos] = largest_key.clone();
+            }
+        }
+    }
+
+    let hand_type = HandType::from_cards(&values);
+    return (values, hand_type);
 }
 
 pub struct Solution {
@@ -160,11 +208,11 @@ impl Solve for Solution {
                 let (hand, bid) = line.split_once(' ').unwrap();
                 let bid = bid.parse::<i32>().unwrap();
 
+                let values = CardValue::cards_to_values(hand);
                 let hand = Hand {
-                    cards: hand.to_string(),
-                    values: CardValue::cards_to_values(hand),
+                    values: values.clone(),
                     bid,
-                    hand_type: HandType::from_cards(hand),
+                    hand_type: HandType::from_cards(&values),
                 };
 
                 hand
@@ -175,28 +223,23 @@ impl Solve for Solution {
     fn part1(&mut self) {
         let mut result = 0;
         let mut current_rank = 1;
-        for ht in HAND_ORDER.iter() {
-            let mut hands: Vec<Hand> = self
-                .hands
-                .iter()
-                .filter_map(|c| {
-                    if c.hand_type == *ht {
-                        return Some(c.clone());
-                    }
 
-                    None
-                })
-                .collect();
-
-            rank_hands(&mut hands);
-            for hand in hands.into_iter() {
-                result += current_rank * hand.bid;
-                current_rank += 1;
+        self.hands.sort_by(|a, b| {
+            if a.hand_type == b.hand_type {
+                return a.is_better_than(b);
             }
+            a.hand_type.cmp(&b.hand_type)
+        });
+
+        for hand in self.hands.iter() {
+            result += current_rank * hand.bid;
+            current_rank += 1;
         }
 
         println!("Day 07 / Part 1: {result}");
     }
 
-    fn part2(&mut self) {}
+    fn part2(&mut self) {
+        self.hands.sort_by(|a, b| b.hand_type.cmp(&a.hand_type));
+    }
 }
