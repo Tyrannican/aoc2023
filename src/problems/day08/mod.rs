@@ -86,8 +86,72 @@ impl Solve for Solution {
             }
         }
 
-        println!("Day 08  / Part 01: {steps}");
+        println!("Day 08 / Part 1: {steps}");
     }
 
-    fn part2(&mut self) {}
+    fn part2(&mut self) {
+        let nodes = self
+            .map
+            .keys()
+            .filter_map(|k| {
+                if k.ends_with("A") {
+                    return Some(k.clone());
+                }
+
+                None
+            })
+            .collect::<Vec<String>>();
+
+        let mut total_steps = vec![];
+        for node in nodes.iter() {
+            let mut steps = 0;
+            let mut src = node;
+            let mut found = false;
+            loop {
+                for direction in self.directions.iter() {
+                    let dsts = self.map.get(src).unwrap();
+                    src = match direction {
+                        Direction::Left => &dsts[0],
+                        Direction::Right => &dsts[1],
+                    };
+                    steps += 1;
+
+                    if src.ends_with("Z") {
+                        total_steps.push((node.clone(), steps as usize));
+                        found = true;
+                        break;
+                    }
+                }
+
+                if found {
+                    break;
+                }
+            }
+        }
+
+        let common_point = find_convergence_point(&total_steps);
+        println!("Day 08 / Part 2: {common_point}");
+    }
+}
+
+// To be fair, I recognised _what_ the solution was, I just didnt know how to implement...
+// Wee bit of help getting the below solution.
+fn gcd(a: usize, b: usize) -> usize {
+    if b == 0 {
+        a
+    } else {
+        gcd(b, a % b)
+    }
+}
+
+fn lcm(a: usize, b: usize) -> usize {
+    (a * b) / gcd(a, b)
+}
+
+fn find_convergence_point(data: &Vec<(String, usize)>) -> usize {
+    let mut result = data[0].1;
+    for i in 1..data.len() {
+        result = lcm(result, data[i].1);
+    }
+    result
 }
