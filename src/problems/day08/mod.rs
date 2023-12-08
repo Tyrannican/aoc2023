@@ -86,7 +86,7 @@ impl Solve for Solution {
             }
         }
 
-        println!("Steps: {steps}");
+        println!("Day 08  / Part 01: {steps}");
     }
 
     fn part2(&mut self) {}
