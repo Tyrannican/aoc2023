@@ -27,7 +27,12 @@ impl Solve for Solution {
         println!("Day 09 / Part 1: {total}");
     }
 
-    fn part2(&mut self) {}
+    fn part2(&mut self) {
+        let histories = self.histories.clone();
+
+        let total = histories.into_iter().map(|h| predict_first(h)).sum::<i64>();
+        println!("Day 09 / Part 2: {total}");
+    }
 }
 
 fn diffs(v: Vec<i64>) -> Vec<i64> {
@@ -46,4 +51,21 @@ fn predict_next(mut history: Vec<i64>) -> i64 {
     }
 
     return values.iter().sum::<i64>();
+}
+
+fn predict_first(mut history: Vec<i64>) -> i64 {
+    let mut prev = 0;
+    let mut values = vec![*history.first().unwrap()];
+
+    loop {
+        history = diffs(history);
+        if history.iter().all(|x| *x == 0) {
+            break;
+        }
+        values.insert(0, *history.first().unwrap());
+    }
+
+    values.into_iter().for_each(|n| prev = n - prev);
+
+    return prev;
 }
