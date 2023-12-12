@@ -23,6 +23,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "dotenv",
+ "kurve",
  "reqwest",
 ]
 
@@ -471,6 +472,12 @@ checksum = "cee9c64da59eae3b50095c18d3e74f8b73c0b86d2792824ff01bbce68ba229ca"
 dependencies = [
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "kurve"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cc5b09dcc41ad30fd668d49ddd3fd78ef412958460da1adfbb38329d70987e59"
 
 [[package]]
 name = "lazy_static"
