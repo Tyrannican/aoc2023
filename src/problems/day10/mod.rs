@@ -18,6 +18,42 @@ impl Solution {
         sol.process_input("day10/input.txt");
         sol
     }
+
+    fn find_loop(&self) -> HashSet<Coord> {
+        let mut current = self.start.clone();
+        let mut seen: HashSet<Coord> = HashSet::new();
+        loop {
+            seen.insert(current);
+            let neighbors: Vec<Coord> = self
+                .map
+                .get_neighbors(current)
+                .unwrap()
+                .into_keys()
+                .collect();
+
+            let mut iter = neighbors.iter();
+            let mut next = iter.next().unwrap();
+
+            let mut finished = false;
+            while seen.contains(next) {
+                match iter.next() {
+                    Some(n) => next = n,
+                    None => {
+                        finished = true;
+                        break;
+                    }
+                }
+            }
+
+            if finished && iter.next().is_none() {
+                break;
+            }
+
+            current = *next;
+        }
+
+        return seen;
+    }
 }
 
 impl Solve for Solution {
@@ -72,42 +108,8 @@ impl Solve for Solution {
     }
 
     fn part1(&mut self) {
-        let mut current = self.start.clone();
-        let mut seen: HashSet<Coord> = HashSet::new();
-        let mut steps = 0;
-        loop {
-            seen.insert(current);
-            let neighbors: Vec<Coord> = self
-                .map
-                .get_neighbors(current)
-                .unwrap()
-                .into_keys()
-                .collect();
-
-            let mut iter = neighbors.iter();
-            let mut next = iter.next().unwrap();
-
-            let mut finished = false;
-            while seen.contains(next) {
-                match iter.next() {
-                    Some(n) => next = n,
-                    None => {
-                        finished = true;
-                        steps += 1;
-                        break;
-                    }
-                }
-            }
-
-            if finished && iter.next().is_none() {
-                break;
-            }
-
-            current = *next;
-            steps += 1;
-        }
-
-        println!("Steps: {}", steps / 2);
+        let path = self.find_loop();
+        println!("Seen: {}", path.len() / 2);
     }
 
     fn part2(&mut self) {}
