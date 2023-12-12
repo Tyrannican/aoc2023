@@ -20,7 +20,12 @@ impl Solve for Solution {
         }
     }
 
-    fn part1(&mut self) {}
+    fn part1(&mut self) {
+        let histories = self.histories.clone();
+
+        let total = histories.into_iter().map(|h| predict_next(h)).sum::<i32>();
+        println!("Total: {total}");
+    }
 
     fn part2(&mut self) {}
 }
@@ -32,4 +37,8 @@ fn diffs(v: Vec<i32>) -> Vec<i32> {
     }
 
     return diff;
+}
+
+fn predict_next(mut history: Vec<i32>) -> i32 {
+    0
 }
