@@ -21,13 +21,10 @@ impl Solve for Solution {
     }
 
     fn part1(&mut self) {
-        let mut total = 0;
         let histories = self.histories.clone();
 
-        for history in histories.into_iter() {
-            total += predict_next(history);
-        }
-        println!("Total: {total}");
+        let total = histories.into_iter().map(|h| predict_next(h)).sum::<i64>();
+        println!("Day 09 / Part 1: {total}");
     }
 
     fn part2(&mut self) {}
