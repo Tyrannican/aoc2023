@@ -18,9 +18,18 @@ def predict_next(history):
 
     return sum(n)
 
+def predict_previous(history):
+    pass
+
 part_1 = 0
+part_2 = 0
 
 for history in histories:
     part_1 += predict_next(history)
 
-print(part_1)
+for history in histories:
+    part_2 += predict_previous(history)
+
+
+print(f"Part 1: {part_1}")
+print(f"Part 2: {part_2}")
