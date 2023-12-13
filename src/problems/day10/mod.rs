@@ -21,9 +21,10 @@ impl Solution {
         sol
     }
 
-    fn find_loop(&self) -> HashSet<Coord> {
+    fn find_loop(&self) -> Vec<Coord> {
         let mut current = self.start.clone();
         let mut seen: HashSet<Coord> = HashSet::new();
+        let mut path = vec![];
         loop {
             seen.insert(current);
             let neighbors: Vec<Coord> = self
@@ -47,6 +48,7 @@ impl Solution {
                 }
             }
 
+            path.push(next.clone());
             if finished {
                 break;
             }
@@ -54,7 +56,7 @@ impl Solution {
             current = *next;
         }
 
-        return seen;
+        return path;
     }
 }
 
@@ -114,22 +116,24 @@ impl Solve for Solution {
 
     fn part1(&mut self) {
         let path = self.find_loop();
-        println!("Seen: {}", path.len() / 2);
+        println!("Day 10 / Part 1: {}", path.len() / 2);
     }
 
+    // Off by one at times
     fn part2(&mut self) {
-        let mut total = 0;
-        let path = self.find_loop().into_iter().collect::<Vec<Coord>>();
+        let path = self.find_loop();
 
-        let mut a = 0;
+        let n = path.len();
+        let (mut left_sum, mut right_sum) = (0, 0);
 
-        for i in 0..path.len() - 1 {
-            a += (path[i].0 * path[i + 1].1) - (path[i + 1].0 * path[i].1);
+        for i in 0..n {
+            let j = (i + 1) % n;
+            left_sum += path[i].0 * path[j].1;
+            right_sum += path[j].0 * path[i].1;
         }
 
-        let calc = a + (path[path.len() - 1].0 * path[0].1) - (path[0].0 * path[path.len() - 1].1);
-
-        let area = i32::abs(calc as i32) / 2;
-        println!("Area: {area:?}");
+        let area = (left_sum as i32 - right_sum as i32).abs() / 2;
+        let inside = area - (n as i32 / 2) + 1;
+        println!("Day 10 / Part 2: {inside} <-- (Can be off by one...)");
     }
 }
