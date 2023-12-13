@@ -47,7 +47,7 @@ impl Solution {
                 }
             }
 
-            if finished && iter.next().is_none() {
+            if finished {
                 break;
             }
 
@@ -120,44 +120,16 @@ impl Solve for Solution {
     fn part2(&mut self) {
         let mut total = 0;
         let path = self.find_loop().into_iter().collect::<Vec<Coord>>();
-        let n = path.len();
 
-        /*
-                *Checking (1, 0)
-        Check: (1, 0), Inside: false Contains? false
-        Check: (1, 1), Inside: false Contains? true
-        Check: (1, 2), Inside: false Contains? true
-        Check: (1, 3), Inside: false Contains? true
-        Check: (1, 4), Inside: false Contains? true
-        Check: (1, 5), Inside: false Contains? true
-        Check: (1, 6), Inside: false Contains? true
-        Check: (1, 7), Inside: false Contains? true
-        Check: (1, 8), Inside: false Contains? true
-        Check: (1, 9), Inside: false Contains? true
-        Check: (1, 10), Inside: false Contains? false
-                */
-        for inner in self.input.iter() {
-            for coord in inner.iter() {
-                if path.contains(coord) {
-                    continue;
-                }
+        let mut a = 0;
 
-                let (x, y) = *coord;
-                let mut intersects = 0;
-                let mut crossed = false;
-                for i in y..inner.len() {
-                    let check = (x, i);
-                    // TODO: Ray cast to check the total number of intersections
-                    // from a point to the end
-                }
-
-                if intersects % 2 != 0 {
-                    println!("Coord: {coord:?} Intersects: {intersects}");
-                    total += 1;
-                }
-            }
+        for i in 0..path.len() - 1 {
+            a += (path[i].0 * path[i + 1].1) - (path[i + 1].0 * path[i].1);
         }
 
-        println!("Count....? {total:?}");
+        let calc = a + (path[path.len() - 1].0 * path[0].1) - (path[0].0 * path[path.len() - 1].1);
+
+        let area = i32::abs(calc as i32) / 2;
+        println!("Area: {area:?}");
     }
 }
