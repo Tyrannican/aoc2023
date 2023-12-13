@@ -123,5 +123,16 @@ impl Solve for Solution {
         println!("Day 11 / Part 1: {total}");
     }
 
-    fn part2(&mut self) {}
+    fn part2(&mut self) {
+        let pairs = self.make_galaxy_pairs();
+        let total = pairs
+            .iter()
+            .map(|p| {
+                let (p1, p2) = *p;
+                self.calculate_distance(p1, p2, 1_000_000 - 1)
+            })
+            .sum::<i64>();
+
+        println!("Total: {total}");
+    }
 }
