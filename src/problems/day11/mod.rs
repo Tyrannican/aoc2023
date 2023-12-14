@@ -133,6 +133,6 @@ impl Solve for Solution {
             })
             .sum::<i64>();
 
-        println!("Total: {total}");
+        println!("Day 11 / Part 2: {total}");
     }
 }
