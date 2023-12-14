@@ -39,3 +39,16 @@ impl Solve for Solution {
 
     fn part2(&mut self) {}
 }
+
+fn arrangements(s: &str) -> u64 {
+    let unknowns = s
+        .chars()
+        .enumerate()
+        .filter_map(|(idx, c)| match c {
+            '?' => Some(idx),
+            _ => None,
+        })
+        .collect::<Vec<usize>>();
+
+    return 0;
+}
