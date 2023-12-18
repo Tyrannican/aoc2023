@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 use crate::utils::*;
 
 type MirrorIdx = (usize, usize);
@@ -9,12 +11,23 @@ pub enum MirrorPlane {
     None,
 }
 
+#[derive(Debug)]
 pub struct AshField {
     grid: Vec<Vec<char>>,
 }
 
 impl AshField {
     pub fn mirror_plane(&self) -> MirrorPlane {
+        let mut checker: HashMap<String, (usize, usize)> = HashMap::new();
+        for (pos, row) in self.grid.iter().enumerate() {
+            let key = row.iter().collect::<String>();
+            checker
+                .entry(key)
+                .and_modify(|e| e.1 = pos)
+                .or_insert((pos, usize::MAX));
+        }
+
+        println!("Checker: {checker:?}");
         return MirrorPlane::None;
     }
 
@@ -52,7 +65,11 @@ impl Solve for Solution {
             .collect::<Vec<AshField>>();
     }
 
-    fn part1(&mut self) {}
+    fn part1(&mut self) {
+        for ash_field in self.ash_fields.iter() {
+            ash_field.mirror_plane();
+        }
+    }
 
     fn part2(&mut self) {}
 }
