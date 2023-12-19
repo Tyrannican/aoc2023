@@ -1,4 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    usize,
+};
 
 use crate::utils::*;
 
@@ -17,7 +20,26 @@ pub struct AshField {
 }
 
 impl AshField {
+    pub fn print(&self) {
+        for row in self.grid.iter() {
+            for ch in row.iter() {
+                print!("{}", ch);
+            }
+            println!();
+        }
+    }
     pub fn mirror_plane(&self) -> MirrorPlane {
+        if let Some(horz) = self.horizontal() {
+            return MirrorPlane::Horizontal(horz);
+        } else if let Some(vert) = self.vertical() {
+            return MirrorPlane::Vertical(vert);
+        } else {
+            return MirrorPlane::None;
+        }
+    }
+
+    fn horizontal(&self) -> Option<(usize, usize)> {
+        self.print();
         let mut checker: HashMap<String, (usize, usize)> = HashMap::new();
         for (pos, row) in self.grid.iter().enumerate() {
             let key = row.iter().collect::<String>();
@@ -27,16 +49,62 @@ impl AshField {
                 .or_insert((pos, usize::MAX));
         }
 
-        println!("Checker: {checker:?}");
-        return MirrorPlane::None;
+        let filtered = checker
+            .values()
+            .filter_map(|v| {
+                if v.1 != usize::MAX && i32::abs(v.0 as i32 - v.1 as i32) == 1 {
+                    return Some(*v);
+                }
+                None
+            })
+            .collect::<Vec<(usize, usize)>>();
+
+        println!("Horz filtered: {filtered:?}");
+        if filtered.is_empty() || filtered.len() == 1 {
+            return None;
+        }
+
+        return Some(filtered[0].clone());
     }
 
-    fn horizontal(&self) -> MirrorPlane {
-        return MirrorPlane::None;
-    }
+    fn vertical(&self) -> Option<(usize, usize)> {
+        println!("Entered Vert");
+        self.print();
+        let mut verts = vec![];
+        for i in (0..self.grid.len()).into_iter() {
+            let mut inner = vec![];
+            for row in self.grid.iter() {
+                inner.push(row[i]);
+            }
+            verts.push(inner);
+        }
 
-    fn vertical(&self) -> MirrorPlane {
-        return MirrorPlane::None;
+        let mut checker: HashMap<String, (usize, usize)> = HashMap::new();
+        for (pos, row) in verts.iter().enumerate() {
+            let key = row.iter().collect::<String>();
+            checker
+                .entry(key)
+                .and_modify(|e| e.1 = pos)
+                .or_insert((pos, usize::MAX));
+        }
+
+        let filtered = checker
+            .values()
+            .filter_map(|v| {
+                if v.1 != usize::MAX && i32::abs(v.0 as i32 - v.1 as i32) == 1 {
+                    return Some(*v);
+                }
+                None
+            })
+            .collect::<Vec<(usize, usize)>>();
+
+        println!("Vert filtered: {filtered:?}");
+
+        if filtered.is_empty() || filtered.len() == 1 {
+            return None;
+        }
+
+        return Some(filtered[0].clone());
     }
 }
 
